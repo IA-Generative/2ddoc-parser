@@ -39,16 +39,16 @@ class AvisImposition:
     """Modèle typé pour Avis d'impôt (28)."""
 
     doc_type: Literal["28"]
-    nombre_parts: Decimal  # 43
+    nombre_de_parts: Decimal  # 43
     reference_avis: str  # 44
-    annee_revenue: int  # 45
-    declarant1: str  # 46
-    revenue_fiscal_de_reference: Optional[int] = None  # 41 (F)
-    declarant1_numero_fiscale: Optional[str] = None  # 47 (F)
-    declarant2: Optional[str] = None  # 48 (F)
-    declarant2_numero_fiscale: Optional[str] = None  # 49 (F)
+    annee_des_revenus: int  # 45
+    declarant_1: str  # 46
+    revenu_fiscal_de_reference: Optional[int] = None  # 41 (F)
+    declarant_1_numero_fiscal: Optional[str] = None  # 47 (F)
+    declarant_2: Optional[str] = None  # 48 (F)
+    declarant_2_numero_fiscal: Optional[str] = None  # 49 (F)
     date_mise_en_recouvrement: Optional[date] = None  # 4A
-    impot_revenue_net: Optional[int] = None  # 4V (F)
+    impot_revenu_net: Optional[int] = None  # 4V (F)
     reste_a_payer: Optional[int] = None  # 4W (F)
     retenue_a_la_source: Optional[int] = None  # 4X (F)
 
@@ -95,16 +95,16 @@ class AvisImposition:
 
         obj = cls(
             doc_type=d.header.doc_type,
-            revenue_fiscal_de_reference=to_int(f.get("41")),
-            nombre_parts=to_dec(f.get("43")),
+            revenu_fiscal_de_reference=to_int(f.get("41")),
+            nombre_de_parts=to_dec(f.get("43")),
             reference_avis=f.get("44", "").strip(),
-            annee_revenue=to_int(f.get("45")),
-            declarant1=f.get("46", "").strip(),
-            declarant1_numero_fiscale=f.get("47"),
-            declarant2=f.get("48"),
-            declarant2_numero_fiscale=f.get("49"),
+            annee_des_revenus=to_int(f.get("45")),
+            declarant_1=f.get("46", "").strip(),
+            declarant_1_numero_fiscal=f.get("47"),
+            declarant_2=f.get("48"),
+            declarant_2_numero_fiscal=f.get("49"),
             date_mise_en_recouvrement=to_date_ddmmyyyy(f.get("4A")),
-            impot_revenue_net=to_int(f.get("4V")),
+            impot_revenu_net=to_int(f.get("4V")),
             reste_a_payer=to_int(f.get("4W")),
             retenue_a_la_source=to_int(f.get("4X")),
             adresse=adresse,
@@ -117,13 +117,13 @@ class AvisImposition:
     # Validation des règles O / F + O(1)/O(2)
     def validate(self) -> None:
         # Obligatoires
-        if not self.nombre_parts:
+        if not self.nombre_de_parts:
             raise ValueError("Nombre de parts (43) est obligatoire.")
         if not self.reference_avis:
             raise ValueError("Référence d’avis (44) est obligatoire.")
-        if not self.annee_revenue:
+        if not self.annee_des_revenus:
             raise ValueError("Année des revenus (45) est obligatoire.")
-        if not self.declarant1:
+        if not self.declarant_1:
             raise ValueError("Déclarant 1 (46) est obligatoire.")
         if not self.date_mise_en_recouvrement:
             raise ValueError("Date de mise en recouvrement (4A) est obligatoire.")

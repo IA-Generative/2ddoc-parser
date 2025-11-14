@@ -67,16 +67,16 @@ class TestAvisImpots:
         avis = result.typed
 
         # Champs obligatoires
-        assert avis.annee_revenue is not None
+        assert avis.annee_des_revenus is not None
 
         assert avis.reference_avis is not None
         assert len(avis.reference_avis) > 0
 
-        assert avis.nombre_parts is not None
-        assert isinstance(avis.nombre_parts, Decimal)
+        assert avis.nombre_de_parts is not None
+        assert isinstance(avis.nombre_de_parts, Decimal)
 
-        assert avis.declarant1 is not None
-        assert "RETI PATRICK" in avis.declarant1
+        assert avis.declarant_1 is not None
+        assert "RETI PATRICK" in avis.declarant_1
 
         assert avis.date_mise_en_recouvrement is not None
         assert isinstance(avis.date_mise_en_recouvrement, date)
@@ -87,11 +87,11 @@ class TestAvisImpots:
         avis = result.typed
 
         # Ces champs peuvent être None ou avoir une valeur
-        assert avis.revenue_fiscal_de_reference is not None
-        assert isinstance(avis.revenue_fiscal_de_reference, int)
+        assert avis.revenu_fiscal_de_reference is not None
+        assert isinstance(avis.revenu_fiscal_de_reference, int)
 
-        assert avis.impot_revenue_net is not None
-        assert isinstance(avis.impot_revenue_net, int)
+        assert avis.impot_revenu_net is not None
+        assert isinstance(avis.impot_revenu_net, int)
 
     def test_adresse_parsing(self, sample_2d_doc):
         """Test que l'adresse est correctement parsée."""
@@ -139,8 +139,8 @@ class TestAvisImpots:
         result = decode_2d_doc(sample_2d_doc)
         avis = result.typed
 
-        assert isinstance(avis.nombre_parts, Decimal)
-        assert avis.nombre_parts > 0
+        assert isinstance(avis.nombre_de_parts, Decimal)
+        assert avis.nombre_de_parts > 0
 
     def test_date_format(self, sample_2d_doc):
         """Test que les dates sont au bon format."""
