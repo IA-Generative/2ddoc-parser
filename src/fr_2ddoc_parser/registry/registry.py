@@ -12,17 +12,18 @@ TypeHandler = Callable[[Decoded2DDoc], Any]
 @dataclass
 class TypeInfo:
     code: str
+    name: str
     handler: TypeHandler
 
 
 class TypeRegistry:
     def __init__(self):
-        self._handlers: Dict[str, TypeHandler] = {}
+        self._handlers: Dict[str, tuple[TypeHandler, name]] = {}
 
-    def register(self, code: str, handler: TypeHandler):
-        self._handlers[code.upper()] = handler
+    def register(self, code: str, handler: TypeHandler, name: str):
+        self._handlers[code.upper()] = [handler, name]
 
-    def get(self, code: str) -> Optional[TypeHandler]:
+    def get(self, code: str) -> Optional[tuple[TypeHandler, name: str]]:
         return self._handlers.get(code.upper())
 
 
@@ -30,13 +31,13 @@ class TypeRegistry:
 _registry = TypeRegistry()
 
 
-def register(code: str):
+def register(code: str, name: str):
     def deco(fn: TypeHandler):
-        _registry.register(code, fn)
+        _registry.register(code, fn, name)
         return fn
 
     return deco
 
 
-def get_handler(code: str) -> Optional[TypeHandler]:
+def get_handler(code: str) -> Optional[tuple[TypeHandler, str]]:
     return _registry.get(code)

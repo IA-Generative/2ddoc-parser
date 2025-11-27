@@ -3,8 +3,9 @@ import importlib
 import pkgutil
 
 from fr_2ddoc_parser.crypto.key_resolver import local_key_resolver
+from fr_2ddoc_parser.model.models import Decoded2DDoc
 from fr_2ddoc_parser.parser.parser import parse
-from fr_2ddoc_parser.registry.registry import get_handler
+from fr_2ddoc_parser.registry.registry import get_handler, TypeHandler
 from fr_2ddoc_parser.type.base import GenericDoc
 import fr_2ddoc_parser.type as _types_pkg
 
@@ -25,7 +26,7 @@ def _ensure_handlers_loaded():
     _handlers_loaded = True
 
 
-def decode_2d_doc(data: str):
+def decode_2d_doc(data: str) -> Decoded2DDoc:
     """Decode un 2D-DOC DC04 depuis une chaîne lue (DataMatrix).
 
     Retourne un objet Decoded2DDoc avec :
@@ -36,9 +37,14 @@ def decode_2d_doc(data: str):
     """
     parsed_data = parse(data)
     _ensure_handlers_loaded()
-    detected_handler = get_handler(parsed_data.header.doc_type)
+    tuple: Optional[tuple[TypeHandler, str]] = get_handler(parsed_data.header.doc_type)
+    detected_handler: Optional[TypeHandler] = None
+    handler_name: Optional[str] = None
+    if tuple is not None :
+        detected_handler, handler_name = tuple
     if detected_handler:
         parsed_data.typed = detected_handler(parsed_data)
+        parsed_data.ants_type = handler_name
     else:
         parsed_data.typed = GenericDoc(
             doc_type=parsed_data.header.doc_type,
@@ -48,6 +54,7 @@ def decode_2d_doc(data: str):
         )
     try:
         parsed_data.verify(key_resolver=local_key_resolver)
-    except Exception:
+    except Exception as e:
+        print(f"Warning: signature verification failed: {e}")
         pass
     return parsed_data

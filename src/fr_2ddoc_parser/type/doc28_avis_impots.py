@@ -1,19 +1,19 @@
 from __future__ import annotations
 
-from dataclasses import dataclass, field
 from datetime import date
 from decimal import Decimal
-from typing import Optional, Dict, Literal
+from typing import Dict, Literal, Optional
+
+from pydantic import BaseModel, Field
 
 from fr_2ddoc_parser.model.models import Decoded2DDoc
-from fr_2ddoc_parser.parser.helper import to_int, to_dec, to_date_ddmmyyyy
+from fr_2ddoc_parser.parser.helper import to_date_ddmmyyyy, to_dec, to_int
 from fr_2ddoc_parser.registry.registry import register
 
 
 # -----------------------------
 # Adresse — règle O(1)/O(2)
-@dataclass
-class AdresseImposition:
+class AdresseImposition(BaseModel):
     """Adresse pour avis d'imposition (docs 28).
     O(1)  : 4Y (adresse complète) obligatoire si on ne peut pas suivre la norme postale.
     O(2)  : 6U/6W/6X/6Y obligatoires si on suit la norme postale (4Y devient alors facultatif).
@@ -34,8 +34,7 @@ class AdresseImposition:
 
 # -----------------------------
 # Avis d'imposition (doc 28)
-@dataclass
-class AvisImposition:
+class AvisImposition(BaseModel):
     """Modèle typé pour Avis d'impôt (28)."""
 
     doc_type: Literal["28"]
@@ -52,10 +51,10 @@ class AvisImposition:
     reste_a_payer: Optional[int] = None  # 4W (F)
     retenue_a_la_source: Optional[int] = None  # 4X (F)
 
-    adresse: AdresseImposition = field(default_factory=AdresseImposition)
+    adresse: AdresseImposition = Field(default_factory=AdresseImposition)
 
     # Champs supplémentaires non cartographiés
-    extras: Dict[str, str] = field(default_factory=dict)
+    extras: Dict[str, str] = Field(default_factory=dict)
 
     # -------------------------
     # Construction depuis Decoded2DDoc
@@ -110,6 +109,8 @@ class AvisImposition:
             adresse=adresse,
             extras=extras,
         )
+        # Ne pas utiliser la validation Pydantic pour les règles métier :
+        # on conserve le comportement existant en appelant validate() explicitement.
         obj.validate()
         return obj
 
@@ -133,6 +134,6 @@ class AvisImposition:
 
 # -----------------------------
 # Handlers d’enregistrement
-@register("28")
+@register("28", "avis_imposition")
 def _handle_28(doc: Decoded2DDoc) -> AvisImposition:
     return AvisImposition.from_decoded(doc)

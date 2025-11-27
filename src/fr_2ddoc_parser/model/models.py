@@ -6,6 +6,7 @@ from typing import Dict, Optional, Any
 
 from fr_2ddoc_parser.crypto.crypto import verify_signature
 from fr_2ddoc_parser.crypto.key_resolver import KeyResolver
+from pydantic import BaseModel
 
 GS = "\x1d"  # Group Separator (sépare les paires champ/valeur)
 US = "\x1f"  # Unit Separator (sépare les données de la signature)
@@ -42,9 +43,10 @@ class Decoded2DDoc:
     # Paires ID -> valeur (après parsing des segments GS)
     fields: Dict[str, str] = field(default_factory=dict)
     # Variante typée (si un modèle dédié existe pour ce type)
-    typed: Optional[Any] = None
+    typed: Optional[BaseModel] = None
     signature: SignatureBlock = field(default_factory=lambda: SignatureBlock(False))
     is_valid: bool = False
+    ants_type: Optional[str] = None
 
     def verify(self, key_resolver: "KeyResolver"):
         """Vérifie la signature si présente via un résolveur de clé (AC+cert)."""
